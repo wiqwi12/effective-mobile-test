@@ -1,0 +1,280 @@
+basePath: /api
+definitions:
+  dto.CreateSongRequest:
+    properties:
+      group:
+        maxLength: 100
+        minLength: 1
+        type: string
+      title:
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - group
+    - title
+    type: object
+  dto.FilteredRequest:
+    properties:
+      group_name:
+        type: string
+      link:
+        type: string
+      release_date:
+        type: string
+      text:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.PaginatedVersesRequest:
+    properties:
+      limit:
+        description: куплетов на страницу
+        minimum: 1
+        type: integer
+      page:
+        minimum: 1
+        type: integer
+    required:
+    - limit
+    - page
+    type: object
+  dto.PaginatedVersesResponse:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      verses:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.SongsResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      songs:
+        items:
+          $ref: '#/definitions/models.Song'
+        type: array
+    type: object
+  dto.StandartResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      song:
+        $ref: '#/definitions/models.Song'
+    type: object
+  dto.UpdateSongRequest:
+    properties:
+      group:
+        type: string
+      link:
+        type: string
+      release_date:
+        type: string
+      text:
+        type: string
+      title:
+        type: string
+    type: object
+  models.Song:
+    properties:
+      created_at:
+        type: string
+      group_id:
+        type: string
+      group_name:
+        type: string
+      link:
+        type: string
+      release_date:
+        type: string
+      song_id:
+        type: string
+      text:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API для управления библиотекой песен и исполнителей
+  title: Music Library API
+  version: "1.0"
+paths:
+  /api/song:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список песен, соответствующих фильтрам
+      parameters:
+      - description: Параметры фильтрации
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FilteredRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список найденных песен
+          schema:
+            $ref: '#/definitions/dto.SongsResponse'
+        "400":
+          description: Ошибка в запросе
+          schema:
+            $ref: '#/definitions/dto.SongsResponse'
+      summary: Получить песни с фильтрацией
+      tags:
+      - songs
+    post:
+      consumes:
+      - application/json
+      description: Создает новую песню в базе данных
+      parameters:
+      - description: Данные для создания песни
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateSongRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Песня успешно создана
+          schema:
+            $ref: '#/definitions/dto.StandartResponse'
+        "400":
+          description: Ошибка в запросе
+          schema:
+            $ref: '#/definitions/dto.StandartResponse'
+      summary: Создать новую песню
+      tags:
+      - songs
+  /api/song/{id}:
+    delete:
+      description: Удаляет песню из базы данных
+      parameters:
+      - description: ID песни
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Песня успешно удалена
+          schema:
+            $ref: '#/definitions/dto.StandartResponse'
+        "400":
+          description: Ошибка в запросе
+          schema:
+            $ref: '#/definitions/dto.StandartResponse'
+      summary: Удалить песню
+      tags:
+      - songs
+    get:
+      description: Возвращает данные песни по её ID
+      parameters:
+      - description: ID песни
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные песни
+          schema:
+            $ref: '#/definitions/dto.StandartResponse'
+        "400":
+          description: Ошибка в запросе
+          schema:
+            $ref: '#/definitions/dto.StandartResponse'
+      summary: Получить песню по ID
+      tags:
+      - songs
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные существующей песни
+      parameters:
+      - description: ID песни
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Данные для обновления песни
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateSongRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Песня успешно обновлена
+          schema:
+            $ref: '#/definitions/dto.StandartResponse'
+        "400":
+          description: Ошибка в запросе
+          schema:
+            $ref: '#/definitions/dto.StandartResponse'
+      summary: Обновить песню
+      tags:
+      - songs
+  /api/verses/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает куплеты песни с указанной пагинацией
+      parameters:
+      - description: ID песни
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Параметры пагинации
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PaginatedVersesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список куплетов песни
+          schema:
+            $ref: '#/definitions/dto.PaginatedVersesResponse'
+        "400":
+          description: Ошибка в запросе
+          schema:
+            $ref: '#/definitions/dto.StandartResponse'
+      summary: Получить куплеты песни с пагинацией
+      tags:
+      - verses
+schemes:
+- http
+swagger: "2.0"
